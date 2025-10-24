@@ -1,10 +1,10 @@
-;;; sbe.el --- Show git blame info in eldoc asynchronously -*- lexical-binding: t -*-
+;;; praise.el --- Show git blame info in eldoc asynchronously -*- lexical-binding: t -*-
 ;;
 
 ;; Author: Ditto <ditto@mf.me>
 ;; Version: 0.1-pre
 ;; Package-Requires: ((emacs "26.1") (async "1.8") (eldoc "1.16"))
-;; URL: https://github.com/emacs-elysium-lab/show-blame-eldoc-mode
+;; URL: https://github.com/emacs-elysium-lab/praise-mode
 ;; Keywords: maint
 
 ;; This file is not part of GNU Emacs.
@@ -31,35 +31,35 @@
 ;; completely rewritten to keep it minimal.
 
 ;; Usage:
-;; M-x show-blame-eldoc-mode
+;; M-x praise-mode
 ;;; Code:
 
 (require 'async)
 
-(defgroup sbe nil
+(defgroup praise nil
   "Minor mode to show git blame in eldoc."
   :group 'tools
-  :prefix "sbe-")
+  :prefix "praise-")
 
-(defcustom sbe-mode-line-ligher ""
+(defcustom praise-mode-line-ligher ""
   "mode-line ligher"
-  :group 'sbe
+  :group 'praise
   :type 'string)
 
 
-(defvar sbe--faces
+(defvar praise--faces
   '((:weight bold)
     (:slant italic :inherit shadow)
     (:inherit default :weight semi-bold)
     (shadow)))
 
-(defvar-local sbe--last-line nil)
+(defvar-local praise--last-line nil)
 
-(defvar-local sbe--last-information nil)
+(defvar-local praise--last-information nil)
 
-(defvar-local sbe--pending-task nil)
+(defvar-local praise--pending-task nil)
 
-(defun sbe--format-time-sexp (ts)
+(defun praise--format-time-sexp (ts)
   "Return a sexp that computes a human-readable relative time for TS (epoch seconds).
 Evaluated inside the subprocess."
   `(when-let* ((ts ,ts)
@@ -85,15 +85,15 @@ Evaluated inside the subprocess."
             (format "%s ago" ts))))))
 
 
-(defun sbe--async (line-num file &optional cb)
+(defun praise--async (line-num file &optional cb)
   (let ((orig-buffer (current-buffer))
         (dir (file-name-directory (expand-file-name file)))
         (fname (file-local-name (expand-file-name file))))
-    (when (and sbe--pending-task
-               (processp sbe--pending-task)
-               (process-live-p sbe--pending-task))
-      (delete-process sbe--pending-task))
-    (setq sbe--pending-task
+    (when (and praise--pending-task
+               (processp praise--pending-task)
+               (process-live-p praise--pending-task))
+      (delete-process praise--pending-task))
+    (setq praise--pending-task
           (async-start
            `(lambda ()
               (require 'cl-lib)
@@ -110,7 +110,7 @@ Evaluated inside the subprocess."
                      (author  (and author-line  (substring author-line  (length "author "))))
                      (ts-str  (and time-line    (substring time-line    (length "author-time "))))
                      (summary (and summary-line (substring summary-line (length "summary "))))
-                     (reltime ,(sbe--format-time-sexp 'ts-str)))
+                     (reltime ,(praise--format-time-sexp 'ts-str)))
                 (list (or author "unknown")
                       (or reltime "unknown")
                       (or summary " ")
@@ -122,27 +122,27 @@ Evaluated inside the subprocess."
                                ;; the proportized string cannot be serialized between subprocesses.
                                (cl-mapcar #'cons
                                           result
-                                          sbe--faces)
+                                          praise--faces)
                                " | ")))
                ;; cb in original buffer
                (with-current-buffer orig-buffer
-                 (setq sbe--last-information formatted)
+                 (setq praise--last-information formatted)
                  (when cb (funcall cb)))))))))
 
 
-(defun sbe--eldoc-function (cb)
+(defun praise--eldoc-function (cb)
   "ElDoc documentation function for git blame information at current line."
   (let ((current-line (line-number-at-pos))
         (file (buffer-file-name)))
-    (if (and file (not (equal current-line sbe--last-line)))
+    (if (and file (not (equal current-line praise--last-line)))
         (progn
-          (setq sbe--last-line current-line)
-          (sbe--async current-line file
-                      (lambda () (funcall cb sbe--last-information
+          (setq praise--last-line current-line)
+          (praise--async current-line file
+                      (lambda () (funcall cb praise--last-information
                                           :thing 'BLAME :face 'default)))
           'async)
-      (when sbe--last-information
-        (funcall cb sbe--last-information :thing 'BLAME :face 'default)
+      (when praise--last-information
+        (funcall cb praise--last-information :thing 'BLAME :face 'default)
         nil))))
 
 
@@ -152,17 +152,14 @@ Evaluated inside the subprocess."
 
 
 ;;;###autoload
-(define-minor-mode sbe-mode
+(define-minor-mode praise-mode
     "Minor mode for showing git blame message in ElDoc."
-  :lighter sbe-mode-line-ligher
-  (if sbe-mode
+  :lighter praise-mode-line-ligher
+  (if praise-mode
       ;; put it at very end of the `eldoc-documentation-functions'
-      (add-hook 'eldoc-documentation-functions #'sbe--eldoc-function 100 t)
-    (remove-hook 'eldoc-documentation-functions #'sbe--eldoc-function)))
+      (add-hook 'eldoc-documentation-functions #'praise--eldoc-function 100 t)
+    (remove-hook 'eldoc-documentation-functions #'praise--eldoc-function)))
 
-(provide 'sbe)
+(provide 'praise)
 
-;;; sbe.el ends here
-;; Local Variables:
-;; read-symbol-shorthands: (("sbe" . "show-blame-eldoc"))
-;; End:
+;;; praise.el ends here
