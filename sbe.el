@@ -89,6 +89,10 @@ Evaluated inside the subprocess."
   (let ((orig-buffer (current-buffer))
         (dir (file-name-directory (expand-file-name file)))
         (fname (file-local-name (expand-file-name file))))
+    (when (and sbe--pending-task
+               (processp sbe--pending-task)
+               (process-live-p sbe--pending-task))
+      (delete-process sbe--pending-task))
     (setq sbe--pending-task
           (async-start
            `(lambda ()
