@@ -4,8 +4,8 @@
 ;; Author: Ditto <ditto@mf.me>
 ;; Version: 0.1-pre
 ;; Package-Requires: ((emacs "26.1") (async "1.8") (eldoc "1.16"))
-;; Keywords: git
 ;; URL: https://github.com/emacs-elysium-lab/show-blame-eldoc-mode
+;; Keywords: maint
 
 ;; This file is not part of GNU Emacs.
 
