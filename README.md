@@ -1,1 +1,1 @@
-# show-blame-eldoc-mode
+# show-blame-eldoc
