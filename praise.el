@@ -158,7 +158,7 @@ Evaluated inside the subprocess."
   (if praise-mode
       ;; put it at very end of the `eldoc-documentation-functions'
       (add-hook 'eldoc-documentation-functions #'praise--eldoc-function 100 t)
-    (remove-hook 'eldoc-documentation-functions #'praise--eldoc-function)))
+    (remove-hook 'eldoc-documentation-functions #'praise--eldoc-function t)))
 
 (provide 'praise)
 
