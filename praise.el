@@ -57,7 +57,7 @@
 
 (defvar-local praise--last-information nil)
 
-(defvar-local praise--pending-task nil)
+(defvar praise--pending-task nil)
 
 (defun praise--format-time-sexp (ts)
   "Return a sexp that computes a human-readable relative time for TS (epoch seconds).
